@@ -4,10 +4,10 @@
   "description": "[![Tests for sprint 13](https://github.com/alexzkv/express-mesto-gha/actions/workflows/tests-13-sprint.yml/badge.svg)](https://github.com/alexzkv/express-mesto-gha/actions/workflows/tests-13-sprint.yml)",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --inspect app.js",
-    "dev": "nodemon app.js",
-    "lint": "npx eslint ."
+    "start": "node app.js",
+    "dev": "mongod && nodemon app.js",
+    "lint": "npx eslint .",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
     "nodemon": "^2.0.19"
   },
   "dependencies": {
-    "express": "^4.18.1"
+    "express": "^4.18.1",
+    "mongoose": "^6.5.3"
   }
 }
