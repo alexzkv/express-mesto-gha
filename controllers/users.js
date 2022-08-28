@@ -3,7 +3,7 @@ const User = require('../models/user');
 const getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch(() => res.status(500).send({ message: 'Ошибка на сервере' }));
 };
 
 const getUserById = (req, res) => {
@@ -16,9 +16,9 @@ const getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res.status(500).send({ message: 'Некорректные данные' });
+        return res.status(500).send({ message: 'Переданы некорректные данные' });
       }
-      return res.status(500).send({ message: 'Произошла ошибка' });
+      return res.status(500).send({ message: 'Ошибка на сервере' });
     });
 };
 
@@ -27,7 +27,12 @@ const createUser = (req, res) => {
 
   User.create({ name, about, avatar })
     .then((user) => res.send({ data: user }))
-    .catch(() => res.status(500).send({ message: 'Произошла ошибка' }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(500).send({ message: 'Переданы некорректные данные' });
+      }
+      return res.status(500).send({ message: 'Ошибка на сервере' });
+    });
 };
 
 module.exports = {
