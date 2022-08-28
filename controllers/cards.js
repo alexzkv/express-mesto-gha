@@ -36,8 +36,50 @@ const deleteCard = (req, res) => {
     });
 };
 
+const likeCard = (req, res) => {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } },
+    { new: true },
+  )
+    .then((card) => {
+      if (!card) {
+        return res.status(500).send({ message: 'Карточка не найдена' });
+      }
+      return res.send({ card });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(500).send({ message: 'Переданы некорректные данные' });
+      }
+      return res.status(500).send({ message: 'Ошибка на сервере' });
+    });
+};
+
+const dislikeCard = (req, res) => {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } },
+    { new: true },
+  )
+    .then((card) => {
+      if (!card) {
+        return res.status(500).send({ message: 'Карточка не найдена' });
+      }
+      return res.send({ card });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(500).send({ message: 'Переданы некорректные данные' });
+      }
+      return res.status(500).send({ message: 'Ошибка на сервере' });
+    });
+};
+
 module.exports = {
   getCards,
   createCard,
   deleteCard,
+  likeCard,
+  dislikeCard,
 };
