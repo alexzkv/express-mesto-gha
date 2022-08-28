@@ -35,8 +35,44 @@ const createUser = (req, res) => {
     });
 };
 
+const updateProfile = (req, res) => {
+  const { name, about } = req.body;
+  User.findByIdAndUpdate(req.user._id, { name, about })
+    .then((user) => {
+      if (!user) {
+        return res.status(500).send({ message: 'Пользователь не найден' });
+      }
+      return res.send({ user });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(500).send({ message: 'Переданы некорректные данные' });
+      }
+      return res.status(500).send({ message: 'Ошибка на сервере' });
+    });
+};
+
+const updateAvatar = (req, res) => {
+  const { avatar } = req.body;
+  User.findByIdAndUpdate(req.user._id, { avatar })
+    .then((user) => {
+      if (!user) {
+        return res.status(500).send({ message: 'Пользователь не найден' });
+      }
+      return res.send({ user });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(500).send({ message: 'Переданы некорректные данные' });
+      }
+      return res.status(500).send({ message: 'Ошибка на сервере' });
+    });
+};
+
 module.exports = {
   getUsers,
   getUserById,
   createUser,
+  updateProfile,
+  updateAvatar,
 };
