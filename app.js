@@ -6,6 +6,7 @@ const cardRouter = require('./routes/cards');
 const { PORT = 3000 } = process.env;
 const app = express();
 const ERROR_SERVER = 500;
+const ERROR_NOT_FOUND = 404;
 
 app.use(express.json());
 app.use((req, res, next) => {
@@ -15,8 +16,12 @@ app.use((req, res, next) => {
 
   next();
 });
+
 app.use('/', userRouter);
 app.use('/', cardRouter);
+app.use('*', (req, res) => {
+  res.status(ERROR_NOT_FOUND).send({ message: 'Страница не найдена' });
+});
 
 async function main(req, res) {
   try {
