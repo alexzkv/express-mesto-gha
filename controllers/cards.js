@@ -3,11 +3,12 @@ const Card = require('../models/card');
 const ERROR_BAD_REQUEST = 400;
 const ERROR_NOT_FOUND = 404;
 const ERROR_SERVER = 500;
+const STATUS_OK = 200;
 
 const getCards = (req, res) => {
   Card.find({})
     .populate('owner')
-    .then((cards) => res.send({ cards }))
+    .then((cards) => res.status(STATUS_OK).send({ cards }))
     .catch(() => res.status(ERROR_SERVER).send({ message: 'Ошибка на сервере' }));
 };
 
@@ -15,7 +16,7 @@ const createCard = (req, res) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: req.user._id })
-    .then((card) => res.send({ card }))
+    .then((card) => res.status(STATUS_OK).send({ card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
@@ -30,7 +31,7 @@ const deleteCard = (req, res) => {
       if (!card) {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
-      return res.send({ card });
+      return res.status(STATUS_OK).send({ card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -50,7 +51,7 @@ const likeCard = (req, res) => {
       if (!card) {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
-      return res.send({ card });
+      return res.status(STATUS_OK).send({ card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
@@ -70,7 +71,7 @@ const dislikeCard = (req, res) => {
       if (!card) {
         return res.status(ERROR_NOT_FOUND).send({ message: 'Карточка не найдена' });
       }
-      return res.send({ card });
+      return res.status(STATUS_OK).send({ card });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
