@@ -7,7 +7,6 @@ const STATUS_OK = 200;
 
 const getCards = (req, res) => {
   Card.find({})
-    .populate('owner')
     .then((cards) => res.status(STATUS_OK).send({ cards }))
     .catch(() => res.status(ERROR_SERVER).send({ message: 'Ошибка на сервере' }));
 };
