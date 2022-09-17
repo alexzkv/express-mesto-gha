@@ -1,4 +1,6 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const AuthError = require('../errors/AuthError');
 const User = require('../models/user');
 
 const ERROR_BAD_REQUEST = 400;
@@ -79,10 +81,72 @@ const updateAvatar = (req, res) => {
     });
 };
 
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email }).select('+password');
+    if (!user) {
+      return next(new AuthError('Неправильные почта или пароль'));
+    }
+    const validPassword = await bcrypt.compare(password, user.password);
+    if (!validPassword) {
+      return next(new AuthError('Неправильные почта или пароль'));
+    }
+
+    const token = jwt.sign(
+      { _id: user._id },
+      'SECRETCODE',
+      { expiresIn: '7d' },
+    );
+    res.cookie('jwt', token, {
+      httpOnly: true,
+      sameSite: true,
+    });
+    return res.status(200).send(user);
+  } catch (err) {
+    return next(new AuthError('Ошибка на сервере'));
+  }
+};
+
+// const login = (req, res, next) => {
+//   const { email, password } = req.body;
+
+//   User.findOne({ email })
+//     .select('+password')
+//     .then((user) => {
+//       if (!user) {
+//         next(new AuthError('Неправильные почта или пароль'));
+//       }
+
+//       bcrypt
+//         .compare(password, user.password)
+//         .then((isUserValid) => {
+//           if (!isUserValid) {
+//             next(new AuthError('Неправильные почта или пароль'));
+//           }
+
+//           const token = jwt.sign({ _id: user._id }, 'SECRETCODE', {
+//             expiresIn: '7d',
+//           });
+//           res
+//             .cookie('jwt', token, {
+//               maxAge: '3600000',
+//               httpOnly: true,
+//               sameSite: true,
+//             })
+//             .send({ _id: user._id });
+//         })
+//         .catch(next);
+//     })
+//     .catch(next);
+// };
+
 module.exports = {
   getUsers,
   getUserById,
   createUser,
   updateProfile,
   updateAvatar,
+  login,
 };
