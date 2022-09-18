@@ -9,9 +9,7 @@ const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
-
-const ERROR_SERVER = 500;
-const ERROR_NOT_FOUND = 404;
+const NotFoundError = require('./errors/NotFoundError');
 
 app.use(express.json());
 app.use(cookieParser());
@@ -20,22 +18,25 @@ app.post('/signin', login);
 
 app.post('/signup', createUser);
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '630b566604677097c1c898e4',
-  };
-
-  next();
-});
-
 app.use(auth);
 app.use('/', userRouter);
 app.use('/', cardRouter);
-app.use('*', (req, res) => {
-  res.status(ERROR_NOT_FOUND).send({ message: 'Страница не найдена' });
+app.use('*', (req, res, next) => {
+  next(new NotFoundError('Страница не найдена'));
 });
 
-async function main(req, res) {
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+
+  res.status(statusCode).send({
+    message: statusCode === 500
+      ? 'Произошла ошибка на сервере'
+      : message,
+  });
+  next(err);
+});
+
+async function main(req, res, next) {
   try {
     await mongoose.connect('mongodb://localhost:27017/mestodb', {
       useNewUrlParser: true,
@@ -44,7 +45,7 @@ async function main(req, res) {
 
     await app.listen(PORT);
   } catch (err) {
-    res.status(ERROR_SERVER).send({ message: 'Ошибка на сервере' });
+    next(new NotFoundError('Ошибка на сервере'));
   }
 }
 
