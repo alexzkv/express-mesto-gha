@@ -1,17 +1,25 @@
 const express = require('express');
 const mongoose = require('mongoose');
-
-const userRouter = require('./routes/users');
-const cardRouter = require('./routes/cards');
-const auth = require('./middlewares/auth');
-const { login, createUser } = require('./controllers/users');
+const cookieParser = require('cookie-parser');
 
 const { PORT = 3000 } = process.env;
 const app = express();
+
+const userRouter = require('./routes/users');
+const cardRouter = require('./routes/cards');
+const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+
 const ERROR_SERVER = 500;
 const ERROR_NOT_FOUND = 404;
 
 app.use(express.json());
+app.use(cookieParser());
+
+app.post('/signin', login);
+
+app.post('/signup', createUser);
+
 app.use((req, res, next) => {
   req.user = {
     _id: '630b566604677097c1c898e4',
@@ -19,10 +27,6 @@ app.use((req, res, next) => {
 
   next();
 });
-
-app.post('/signin', login);
-
-app.post('/signup', createUser);
 
 app.use(auth);
 app.use('/', userRouter);

@@ -13,6 +13,22 @@ const getUsers = (req, res) => {
     .catch(() => res.status(ERROR_SERVER).send({ message: 'Ошибка на сервере' }));
 };
 
+const getUserInfo = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        return next(new AuthError('Пользователь не найден'));
+      }
+      return res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res.status(ERROR_BAD_REQUEST).send({ message: 'Переданы некорректные данные' });
+      }
+      return next(err);
+    });
+};
+
 const getUserById = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
@@ -81,66 +97,35 @@ const updateAvatar = (req, res) => {
     });
 };
 
-const login = async (req, res, next) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
-  try {
-    const user = await User.findOne({ email }).select('+password');
-    if (!user) {
-      return next(new AuthError('Неправильные почта или пароль'));
-    }
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      return next(new AuthError('Неправильные почта или пароль'));
-    }
+  User.findOne({ email })
+    .select('+password')
+    .then((user) => {
+      if (!user) {
+        next(new AuthError('Неправильные почта или пароль'));
+      }
 
-    const token = jwt.sign(
-      { _id: user._id },
-      'SECRETCODE',
-      { expiresIn: '7d' },
-    );
-    res.cookie('jwt', token, {
-      httpOnly: true,
-      sameSite: true,
-    });
-    return res.status(200).send(user);
-  } catch (err) {
-    return next(new AuthError('Ошибка на сервере'));
-  }
+      bcrypt.compare(password, user.password)
+        .then((isUserValid) => {
+          if (!isUserValid) {
+            next(new AuthError('Неправильные почта или пароль'));
+          }
+
+          const token = jwt.sign({ _id: user._id }, 'SECRETCODE', { expiresIn: '7d' });
+          res
+            .cookie('jwt', token, {
+              maxAge: '3600000',
+              httpOnly: true,
+              sameSite: true,
+            })
+            .send({ data: user });
+        })
+        .catch(next);
+    })
+    .catch(next);
 };
-
-// const login = (req, res, next) => {
-//   const { email, password } = req.body;
-
-//   User.findOne({ email })
-//     .select('+password')
-//     .then((user) => {
-//       if (!user) {
-//         next(new AuthError('Неправильные почта или пароль'));
-//       }
-
-//       bcrypt
-//         .compare(password, user.password)
-//         .then((isUserValid) => {
-//           if (!isUserValid) {
-//             next(new AuthError('Неправильные почта или пароль'));
-//           }
-
-//           const token = jwt.sign({ _id: user._id }, 'SECRETCODE', {
-//             expiresIn: '7d',
-//           });
-//           res
-//             .cookie('jwt', token, {
-//               maxAge: '3600000',
-//               httpOnly: true,
-//               sameSite: true,
-//             })
-//             .send({ _id: user._id });
-//         })
-//         .catch(next);
-//     })
-//     .catch(next);
-// };
 
 module.exports = {
   getUsers,
@@ -149,4 +134,5 @@ module.exports = {
   updateProfile,
   updateAvatar,
   login,
+  getUserInfo,
 };
