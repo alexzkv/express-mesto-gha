@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-// eslint-disable-next-line no-unused-vars
 const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
@@ -18,6 +17,12 @@ const userSchema = new mongoose.Schema({
   avatar: {
     type: String,
     default: 'https://pictures.s3.yandex.net/resources/jacques-cousteau_1604399756.png',
+    validate: {
+      validator(v) {
+        return /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9-._~:/?#@!$&'()*+,;=]*)/.test(v);
+      },
+      message: 'Введите корректную ссылку',
+    },
   },
   email: {
     type: String,
@@ -25,7 +30,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator(v) {
-        return /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9-._~:/?#@!$&'()*+,;=]*)/.test(v);
+        return validator.isEmail(v);
       },
       message: 'Введите корректный email',
     },
