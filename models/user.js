@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+// eslint-disable-next-line no-unused-vars
 const validator = require('validator');
 
 const userSchema = new mongoose.Schema({
@@ -24,7 +25,7 @@ const userSchema = new mongoose.Schema({
     unique: true,
     validate: {
       validator(v) {
-        return validator.isEmail(v);
+        return /^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9-._~:/?#@!$&'()*+,;=]*)/.test(v);
       },
       message: 'Введите корректный email',
     },
