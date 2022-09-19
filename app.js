@@ -8,9 +8,9 @@ const app = express();
 
 const userRouter = require('./routes/users');
 const cardRouter = require('./routes/cards');
-const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/NotFoundError');
+const { login, createUser } = require('./controllers/users');
 
 app.use(express.json());
 app.use(cookieParser());
@@ -33,13 +33,16 @@ app.post('/signup', celebrate({
 }), createUser);
 
 app.use(auth);
+
 app.use('/', userRouter);
 app.use('/', cardRouter);
+
 app.use('*', (req, res, next) => {
   next(new NotFoundError('Страница не найдена'));
 });
 
 app.use(errors());
+
 app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
@@ -48,7 +51,7 @@ app.use((err, req, res, next) => {
       ? 'Произошла ошибка на сервере'
       : message,
   });
-  next(err);
+  next();
 });
 
 async function main(req, res, next) {
