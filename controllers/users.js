@@ -76,7 +76,7 @@ const updateProfile = (req, res, next) => {
       return res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         return next(new BadRequestError('Переданы некорректные данные'));
       }
       return next(err);
@@ -93,7 +93,7 @@ const updateAvatar = (req, res, next) => {
       return res.send({ data: user });
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
+      if (err.name === 'ValidationError' || err.name === 'CastError') {
         return next(new BadRequestError('Переданы некорректные данные'));
       }
       return next(err);
