@@ -11,6 +11,7 @@ const cardRouter = require('./routes/cards');
 const auth = require('./middlewares/auth');
 const NotFoundError = require('./errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
+const { regex } = require('./utils/regex');
 
 app.use(express.json());
 app.use(cookieParser());
@@ -27,7 +28,7 @@ app.post('/signup', celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string()
-      .regex(/^(https:\/\/)?(www\.)?([a-zA-Z0-9]{1}[a-zA-Z0-9-]*\.?)*\.{1}[a-zA-Z0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/),
+      .regex(regex),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
