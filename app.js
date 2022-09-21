@@ -27,7 +27,7 @@ app.post('/signup', celebrate({
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string()
-      .regex(/^https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-z0-9]{1,6}\b([-a-z0-9-._~:/?#@!$&'()*+,;=]*)/),
+      .regex(/^(https:\/\/)?(www\.)?([a-zA-Z0-9]{1}[a-zA-Z0-9-]*\.?)*\.{1}[a-zA-Z0-9-]{2,8}(\/([\w#!:.?+=&%@!\-/])*)?/),
     email: Joi.string().required().email(),
     password: Joi.string().required(),
   }),
@@ -55,17 +55,16 @@ app.use((err, req, res, next) => {
   next();
 });
 
-async function main(req, res, next) {
-  try {
-    await mongoose.connect('mongodb://localhost:27017/mestodb', {
-      useNewUrlParser: true,
-      useUnifiedTopology: false,
-    });
+async function main() {
+  await mongoose.connect('mongodb://localhost:27017/mestodb', {
+    useNewUrlParser: true,
+    useUnifiedTopology: false,
+  });
 
-    await app.listen(PORT);
-  } catch (err) {
-    next(new NotFoundError('Ошибка на сервере'));
-  }
+  await app.listen(PORT);
+
+  // eslint-disable-next-line no-console
+  console.log(`Сервер запущен на ${PORT} порту`);
 }
 
 main();
